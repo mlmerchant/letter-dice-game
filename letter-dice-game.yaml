@@ -1,0 +1,187 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: letter-dice-game-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: letter-dice-game
+  template:
+    metadata:
+      labels:
+        app: letter-dice-game
+    spec:
+      volumes:
+      - name: shared-img-folder
+        emptyDir: {}
+      - name: script-volume
+          configMap:
+            name: letter-dice-game-script
+      - name: shared-tiles-folder
+        emptyDir: {}
+
+      containers:
+      - name: nginx-container
+        image: nginx
+        volumeMounts:
+        - name: shared-img-folder
+          mountPath: /usr/share/nginx/html/img
+        command: ["/bin/bash", "-c"]
+        args: ["apt-get update && apt-get install -y imagemagick && /scripts/dice_game.sh"]
+
+      - name: ubuntu-container
+        image: ubuntu:latest
+        volumeMounts:
+        - name: shared-img-folder
+          mountPath: /img
+        - name: script-volume
+          mountPath: /scripts
+        - name: shared-tiles-folder
+          mountPath: /tiles
+
+      initContainers:
+      - name: create-tiles-container
+        image: python:latest
+        volumeMounts:
+        - name: script-volume
+          mountPath: /scripts
+        - name: shared-tiles-folder
+          mountPath: /tiles
+        command: ["/bin/bash", "-c"]
+        args: ["pip install pillow && python3 /scripts/letter_tile.py"]
+
+        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: letter-dice-game-service
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    nodePort: 30007
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: letter-dice-game
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: letter-dice-game-script
+data:
+  dice_game.sh: |
+    #!/bin/bash
+
+    # The dice used for the game.
+    declare -a Dice=(
+        "('D' 'R' 'X' 'I' 'L' 'E')"
+        "('B' 'B' 'A' 'O' 'J' 'O')"
+        "('O' 'U' 'M' 'C' 'I' 'T')"
+        "('R' 'H' 'Z' 'L' 'N' 'N')"
+        "('L' 'Y' 'E' 'D' 'R' 'V')"
+        "('N' 'U' 'I' 'H' 'M' 'Qu')"
+        "('E' 'U' 'S' 'E' 'N' 'I')"
+        "('E' 'R' 'W' 'T' 'V' 'H')"
+        "('A' 'E' 'A' 'G' 'E' 'N')"
+        "('S' 'P' 'A' 'H' 'C' 'O')"
+        "('L' 'T' 'Y' 'E' 'R' 'T')"
+        "('S' 'O' 'I' 'S' 'E' 'T')"
+        "('T' 'W' 'O' 'O' 'T' 'A')"
+        "('N' 'W' 'E' 'G' 'E' 'H')"
+        "('S' 'A' 'F' 'P' 'F' 'K')"
+        "('T' 'S' 'T' 'I' 'D' 'Y')"
+    )
+
+    # Build the dice from the tiles
+    # Assumes tiles exist for all letters used in "tiles/" folder.
+    x=1
+    rm -rf dice
+    mkdir dice
+    for dice in "${Dice[@]}"; do
+        mkdir dice/$x
+        y=1
+        IFS=' ' read -r -a sides <<< "${dice//[\(\)\']/}"
+        for side in "${sides[@]}"; do
+            cp tiles/$side.jpg dice/$x/$y.jpg
+            ((y++))
+        done
+
+        ((x++))
+    done
+
+    while true; do
+        # Roll all the dice.
+        file_list=()
+        for folder_number in {1..16}; do
+        random_image_number=$((RANDOM % 6 + 1))
+        image_path="dice/$folder_number/$random_image_number.jpg"
+        file_list+=("$image_path")
+        done
+
+        # Shuffle the board.
+        shuffled_file_list=($(printf "%s\n" "${file_list[@]}" | shuf))
+
+        # Spin the dice (or not)
+        rm -rf out > /dev/null
+        mkdir out
+        index=1
+        for filename in "${file_list[@]}"; do
+        degrees=$(( RANDOM % 4))
+        degrees=$(( degrees * 90 ))
+        if [[ $degrees -gt 0 ]]; then
+            convert $filename -rotate $degrees out/$index.jpg
+        else
+            cp  $filename out/$index.jpg
+        fi
+        
+        ((index++))
+        done
+
+        # combine the files
+        montage out/1.jpg out/2.jpg out/3.jpg out/4.jpg out/5.jpg out/6.jpg out/7.jpg out/8.jpg out/9.jpg out/10.jpg out/11.jpg out/12.jpg out/13.jpg out/14.jpg out/15.jpg out/16.jpg -tile 4x4 -geometry +0+0 img/board.jpg
+        sleep 10
+    done
+    
+  letter_tile.py: |
+    #!/usr/bin/python3
+    def letter_tile(letter):  
+        from PIL import Image, ImageDraw, ImageFont  
+
+        # Create a square image with white background  
+        size = (500, 500)  
+        image = Image.new("RGB", size, color="white")  
+
+        # Prepare to draw on the image  
+        draw = ImageDraw.Draw(image)  
+
+        # Specify a larger font size (e.g., 40 points)  
+        # You can replace font with any other font file if needed    
+        if len(letter) == 1:  
+            font = ImageFont.truetype("DejaVuSans.ttf", 425)  
+        else:  
+            font = ImageFont.truetype("DejaVuSans.ttf", 275)  
+
+        # Draw the text in the center  
+        if letter == "W":  
+            draw.text((47, 0), letter, fill="black", font=font)
+        elif letter in ["A","B","C","D","E","U","V","G","H","K","X","R","S"]:
+            draw.text((108, 0), letter, fill="black", font=font)
+        elif letter in ["J", "I"]:
+            draw.text((180, 0), letter, fill="black", font=font)  
+        elif letter in ["M", "N", "O", "Q"]:
+            draw.text((90, 0), letter, fill="black", font=font) 
+        elif len(letter) == 1:  
+            draw.text((115, 0), letter, fill="black", font=font)  
+        else:  
+            draw.text((60, 100), letter, fill="black", font=font)  
+
+        # Save the image  
+        image.save(f"tiles/{letter}.jpg")  
+
+
+    for letter in ["Qu", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",  
+                   "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]:  
+        letter_tile(letter)
