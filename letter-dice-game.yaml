@@ -96,16 +96,16 @@ data:
     )
 
     # Build the dice from the tiles
-    # Assumes tiles exist for all letters used in "tiles/" folder.
+    # Assumes tiles exist for all letters used in "/tiles/" folder.
     x=1
     rm -rf dice
     mkdir dice
     for dice in "${Dice[@]}"; do
-        mkdir dice/$x
+        mkdir /root/dice/$x
         y=1
         IFS=' ' read -r -a sides <<< "${dice//[\(\)\']/}"
         for side in "${sides[@]}"; do
-            cp tiles/$side.jpg dice/$x/$y.jpg
+            cp /tiles/$side.jpg /root/dice/$x/$y.jpg
             ((y++))
         done
 
@@ -117,7 +117,7 @@ data:
         file_list=()
         for folder_number in {1..16}; do
         random_image_number=$((RANDOM % 6 + 1))
-        image_path="dice/$folder_number/$random_image_number.jpg"
+        image_path="/root/dice/$folder_number/$random_image_number.jpg"
         file_list+=("$image_path")
         done
 
@@ -125,23 +125,23 @@ data:
         shuffled_file_list=($(printf "%s\n" "${file_list[@]}" | shuf))
 
         # Spin the dice (or not)
-        rm -rf out > /dev/null
-        mkdir out
+        rm -rf /root/out > /dev/null
+        mkdir /root/out
         index=1
         for filename in "${file_list[@]}"; do
         degrees=$(( RANDOM % 4))
         degrees=$(( degrees * 90 ))
         if [[ $degrees -gt 0 ]]; then
-            convert $filename -rotate $degrees out/$index.jpg
+            convert $filename -rotate $degrees /root/out/$index.jpg
         else
-            cp  $filename out/$index.jpg
+            cp  $filename /root/out/$index.jpg
         fi
         
         ((index++))
         done
 
         # combine the files
-        montage out/1.jpg out/2.jpg out/3.jpg out/4.jpg out/5.jpg out/6.jpg out/7.jpg out/8.jpg out/9.jpg out/10.jpg out/11.jpg out/12.jpg out/13.jpg out/14.jpg out/15.jpg out/16.jpg -tile 4x4 -geometry +0+0 img/board.jpg
+        montage /root/out/1.jpg /root/out/2.jpg /root/out/3.jpg /root/out/4.jpg /root/out/5.jpg /root/out/6.jpg /root/out/7.jpg /root/out/8.jpg /root/out/9.jpg /root/out/10.jpg /root/out/11.jpg /root/out/12.jpg /root/out/13.jpg /root/out/14.jpg /root/out/15.jpg /root/out/16.jpg -tile 4x4 -geometry +0+0 img/board.jpg
         sleep 10
     done
     
