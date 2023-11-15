@@ -201,7 +201,7 @@ data:
         server_name _;  # Catch-all server block
 
         location / {
-            root /path/to/directory;  # The directory where file.jpg is located
-            try_files /file.jpg =404;  # Serve file.jpg for all requests
+            root /img;  # The directory where file.jpg is located
+            try_files /board.jpg =404;  # Serve file.jpg for all requests
         }
     }
