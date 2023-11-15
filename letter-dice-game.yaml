@@ -101,7 +101,7 @@ data:
     # Assumes tiles exist for all letters used in "/tiles/" folder.
     x=1
     rm -rf dice
-    mkdir dice
+    mkdir /tmp/dice
     for dice in "${Dice[@]}"; do
         mkdir /tmp/dice/$x
         y=1
