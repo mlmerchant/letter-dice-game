@@ -196,12 +196,16 @@ metadata:
   name: nginx-config
 data:
   nginx.conf: |
-    server {
-        listen 80;
-        server_name _;  # Catch-all server block
+    events {}
+    http {
+        server {
+            listen 80;
+            server_name _;  # Catch-all server block
 
-        location / {
-            root /img;  # The directory where file.jpg is located
-            try_files /board.jpg =404;  # Serve file.jpg for all requests
+            location / {
+                root /img;  # The directory where file.jpg is located
+                try_files /board.jpg =404;  # Serve file.jpg for all requests
+            }
         }
     }
+
