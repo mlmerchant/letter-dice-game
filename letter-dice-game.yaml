@@ -15,6 +15,8 @@ spec:
       volumes:
       - name: shared-img-folder
         emptyDir: {}
+      - name: scratch-folder
+        emptyDir: {}
       - name: script-volume
         configMap:
           name: letter-dice-game-script
@@ -101,11 +103,11 @@ data:
     rm -rf dice
     mkdir dice
     for dice in "${Dice[@]}"; do
-        mkdir /root/dice/$x
+        mkdir /tmp/dice/$x
         y=1
         IFS=' ' read -r -a sides <<< "${dice//[\(\)\']/}"
         for side in "${sides[@]}"; do
-            cp /tiles/$side.jpg /root/dice/$x/$y.jpg
+            cp /tiles/$side.jpg /tmp/dice/$x/$y.jpg
             ((y++))
         done
 
@@ -117,7 +119,7 @@ data:
         file_list=()
         for folder_number in {1..16}; do
         random_image_number=$((RANDOM % 6 + 1))
-        image_path="/root/dice/$folder_number/$random_image_number.jpg"
+        image_path="/tmp/dice/$folder_number/$random_image_number.jpg"
         file_list+=("$image_path")
         done
 
@@ -125,23 +127,23 @@ data:
         shuffled_file_list=($(printf "%s\n" "${file_list[@]}" | shuf))
 
         # Spin the dice (or not)
-        rm -rf /root/out > /dev/null
-        mkdir /root/out
+        rm -rf /tmp/out > /dev/null
+        mkdir /tmp/out
         index=1
         for filename in "${file_list[@]}"; do
         degrees=$(( RANDOM % 4))
         degrees=$(( degrees * 90 ))
         if [[ $degrees -gt 0 ]]; then
-            convert $filename -rotate $degrees /root/out/$index.jpg
+            convert $filename -rotate $degrees /tmp/out/$index.jpg
         else
-            cp  $filename /root/out/$index.jpg
+            cp  $filename /tmp/out/$index.jpg
         fi
         
         ((index++))
         done
 
         # combine the files
-        montage /root/out/1.jpg /root/out/2.jpg /root/out/3.jpg /root/out/4.jpg /root/out/5.jpg /root/out/6.jpg /root/out/7.jpg /root/out/8.jpg /root/out/9.jpg /root/out/10.jpg /root/out/11.jpg /root/out/12.jpg /root/out/13.jpg /root/out/14.jpg /root/out/15.jpg /root/out/16.jpg -tile 4x4 -geometry +0+0 img/board.jpg
+        montage /tmp/out/1.jpg /tmp/out/2.jpg /tmp/out/3.jpg /tmp/out/4.jpg /tmp/out/5.jpg /tmp/out/6.jpg /tmp/out/7.jpg /tmp/out/8.jpg /tmp/out/9.jpg /tmp/out/10.jpg /tmp/out/11.jpg /tmp/out/12.jpg /tmp/out/13.jpg /tmp/out/14.jpg /tmp/out/15.jpg /tmp/out/16.jpg -tile 4x4 -geometry +0+0 img/board.jpg
         sleep 10
     done
     
