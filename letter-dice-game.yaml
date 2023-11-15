@@ -100,7 +100,6 @@ data:
     # Build the dice from the tiles
     # Assumes tiles exist for all letters used in "/tiles/" folder.
     x=1
-    rm -rf dice
     mkdir /tmp/dice
     for dice in "${Dice[@]}"; do
         mkdir /tmp/dice/$x
@@ -127,7 +126,6 @@ data:
         shuffled_file_list=($(printf "%s\n" "${file_list[@]}" | shuf))
 
         # Spin the dice (or not)
-        rm -rf /tmp/out > /dev/null
         mkdir /tmp/out
         index=1
         for filename in "${file_list[@]}"; do
@@ -143,7 +141,7 @@ data:
         done
 
         # combine the files
-        montage /tmp/out/1.jpg /tmp/out/2.jpg /tmp/out/3.jpg /tmp/out/4.jpg /tmp/out/5.jpg /tmp/out/6.jpg /tmp/out/7.jpg /tmp/out/8.jpg /tmp/out/9.jpg /tmp/out/10.jpg /tmp/out/11.jpg /tmp/out/12.jpg /tmp/out/13.jpg /tmp/out/14.jpg /tmp/out/15.jpg /tmp/out/16.jpg -tile 4x4 -geometry +0+0 img/board.jpg
+        montage /tmp/out/1.jpg /tmp/out/2.jpg /tmp/out/3.jpg /tmp/out/4.jpg /tmp/out/5.jpg /tmp/out/6.jpg /tmp/out/7.jpg /tmp/out/8.jpg /tmp/out/9.jpg /tmp/out/10.jpg /tmp/out/11.jpg /tmp/out/12.jpg /tmp/out/13.jpg /tmp/out/14.jpg /tmp/out/15.jpg /tmp/out/16.jpg -tile 4x4 -geometry +0+0 /img/board.jpg
         sleep 10
     done
     
