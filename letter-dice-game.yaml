@@ -33,7 +33,7 @@ spec:
       - name: ubuntu-container
         image: ubuntu:latest
         command: ["/bin/bash", "-c"]
-        args: ["apt-get update && apt-get install -y imagemagick && /scripts/dice_game.sh"]
+        args: ["apt update && apt install -y imagemagick && bash /scripts/dice_game.sh"]
         volumeMounts:
         - name: shared-img-folder
           mountPath: /img
