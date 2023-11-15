@@ -16,8 +16,8 @@ spec:
       - name: shared-img-folder
         emptyDir: {}
       - name: script-volume
-          configMap:
-            name: letter-dice-game-script
+        configMap:
+          name: letter-dice-game-script
       - name: shared-tiles-folder
         emptyDir: {}
 
