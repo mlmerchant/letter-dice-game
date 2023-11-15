@@ -126,7 +126,7 @@ data:
         shuffled_file_list=($(printf "%s\n" "${file_list[@]}" | shuf))
 
         # Spin the dice (or not)
-        mkdir /tmp/out
+        mkdir /tmp/out > /dev/null
         index=1
         for filename in "${file_list[@]}"; do
         degrees=$(( RANDOM % 4))
