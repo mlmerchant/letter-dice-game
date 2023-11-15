@@ -27,11 +27,11 @@ spec:
         volumeMounts:
         - name: shared-img-folder
           mountPath: /usr/share/nginx/html/img
-        command: ["/bin/bash", "-c"]
-        args: ["apt-get update && apt-get install -y imagemagick && /scripts/dice_game.sh"]
 
       - name: ubuntu-container
         image: ubuntu:latest
+        command: ["/bin/bash", "-c"]
+        args: ["apt-get update && apt-get install -y imagemagick && /scripts/dice_game.sh"]
         volumeMounts:
         - name: shared-img-folder
           mountPath: /img
