@@ -22,6 +22,9 @@ spec:
           name: letter-dice-game-script
       - name: shared-tiles-folder
         emptyDir: {}
+      - name: config-volume
+        configMap:
+          name: nginx-config
 
       containers:
       - name: nginx-container
@@ -29,6 +32,9 @@ spec:
         volumeMounts:
         - name: shared-img-folder
           mountPath: /usr/share/nginx/html/img
+        - name: config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
 
       - name: ubuntu-container
         image: ubuntu:latest
@@ -51,9 +57,7 @@ spec:
         - name: shared-tiles-folder
           mountPath: /tiles
         command: ["/bin/bash", "-c"]
-        args: ["pip install pillow && python3 /scripts/letter_tile.py"]
-
-        
+        args: ["pip install pillow && python3 /scripts/letter_tile.py"]       
 ---
 apiVersion: v1
 kind: Service
@@ -185,3 +189,19 @@ data:
     for letter in ["Qu", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L",  
                    "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]:  
         letter_tile(letter)
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    server {
+        listen 80;
+        server_name _;  # Catch-all server block
+
+        location / {
+            root /path/to/directory;  # The directory where file.jpg is located
+            try_files /file.jpg =404;  # Serve file.jpg for all requests
+        }
+    }
