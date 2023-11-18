@@ -170,13 +170,15 @@ data:
 
         # Draw the text in the center  
         if letter == "W":  
-            draw.text((47, 0), letter, fill="black", font=font)
+            draw.text((47, 0), letter, fill="red", font=font)
         elif letter in ["A","B","C","D","E","U","V","G","H","K","X","R","S"]:
             draw.text((108, 0), letter, fill="black", font=font)
         elif letter in ["J", "I"]:
-            draw.text((180, 0), letter, fill="black", font=font)  
+            draw.text((180, 0), letter, fill="black", font=font)
         elif letter in ["M", "N", "O", "Q"]:
-            draw.text((90, 0), letter, fill="black", font=font) 
+            draw.text((90, 0), letter, fill="black", font=font)
+        elif letter == "Z":
+            draw.text((115, 0), letter, fill="red", font=font)
         elif len(letter) == 1:  
             draw.text((115, 0), letter, fill="black", font=font)  
         else:  
